@@ -1,0 +1,5 @@
+self
+self.exe
+run.ps1
+.env
+dump.rdb
