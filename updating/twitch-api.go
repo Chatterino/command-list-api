@@ -12,7 +12,10 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-var helixClient *helix.Client
+var (
+	helixClient         *helix.Client
+	errAppTokenNotReady = errors.New("app access token not ready")
+)
 
 func init() {
 	if os.Getenv("TWITCH_CLIENT_ID") == "" {
@@ -63,6 +66,10 @@ func getLogin(rdb *redis.Client, uid UserId) (string, error) {
 	}
 
 	// get from twitch
+	if helixClient.GetAppAccessToken() == "" {
+		return "", errAppTokenNotReady
+	}
+
 	resp, err := helixClient.GetUsers(&helix.UsersParams{
 		IDs: []string{uid},
 	})

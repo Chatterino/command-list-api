@@ -11,6 +11,8 @@ var (
 	allProviders = []Provider{
 		{id: "fossa", fetch: FetchFossa},
 		{id: "streamelements", fetch: FetchStreamElements},
+		// assuming that there is only one pajbot per channel
+		{id: "pajbot", fetch: FetchPajbot},
 	}
 )
 

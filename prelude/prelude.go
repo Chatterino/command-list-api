@@ -23,8 +23,8 @@ type UserLogin = string
 
 type Command struct {
 	Prefix      string `json:"prefix"`
-	Description string `json:"description"`
-	Source      string `json:"source"`
+	Description string `json:"description,omitempty"`
+	Source      string `json:"source,omitempty"`
 }
 
 // FetchJson runs an http request and unmarshals the response into v.

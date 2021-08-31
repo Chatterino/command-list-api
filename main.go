@@ -19,6 +19,7 @@ func main() {
 	}
 
 	// conn redis
+	log.Println("connecting redis:", redisUrl)
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     redisUrl,
 		Password: "", // no password set
