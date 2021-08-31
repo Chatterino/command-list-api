@@ -98,6 +98,10 @@ func FetchStreamElements(uid UserId, login UserLogin) ([]Command, error) {
 	}
 
 	for _, cmd := range channelCmds {
+		if !cmd.Enabled {
+			continue
+		}
+
 		if cmd.Hidden {
 			continue
 		}
