@@ -1,52 +1,62 @@
 package updating
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
 	. "self/prelude"
+	"time"
 )
 
-type fossaResp struct {
-	Channelname string `json:"channelName"`
-	Channel     struct {
-		Avatar      string `json:"avatar"`
-		Provider    string `json:"provider"`
-		Providerid  string `json:"providerId"`
-		Displayname string `json:"displayName"`
-		Login       string `json:"login"`
+type fossaChannelResp struct {
+	Channel struct {
+		ID              string    `json:"id"`
+		Login           string    `json:"login"`
+		DisplayName     string    `json:"display_name"`
+		Avatar          string    `json:"avatar"`
+		Slug            string    `json:"slug"`
+		BroadcasterType string    `json:"broadcaster_type"`
+		Provider        string    `json:"provider"`
+		ProviderID      string    `json:"provider_id"`
+		CreatedAt       time.Time `json:"createdAt"`
 	} `json:"channel"`
+	Parent struct {
+		ID       string `json:"id"`
+		Type     string `json:"type"`
+		ParentID string `json:"parent_id"`
+	} `json:"parent"`
+}
+
+type fossaCommandsResp struct {
+	Roles []struct {
+		ID      string `json:"id"`
+		Name    string `json:"name"`
+		Default bool   `json:"default"`
+	} `json:"roles"`
 	Commands []struct {
-		Minuserlevel int    `json:"minUserlevel"`
-		ID           string `json:"_id"`
-		Name         string `json:"name"`
-		Response     string `json:"response"`
+		EnabledOffline bool          `json:"enabled_offline"`
+		EnabledOnline  bool          `json:"enabled_online"`
+		ID             string        `json:"id"`
+		Name           string        `json:"name"`
+		Response       string        `json:"response"`
+		Type           string        `json:"type"`
+		Aliases        []interface{} `json:"aliases"`
+		RoleIDs        []interface{} `json:"role_ids"`
 	} `json:"commands"`
 }
 
 // FetchFossa loads the public commands from the fossabot api by user login.
 func FetchFossa(uid UserId, login UserLogin) ([]Command, error) {
-	resp, err := http.Get(
-		`https://api-v1.fossabot.com/api/v1/` + login + `/public-commands`)
-
+	channel, err := fetchFossaChannel(login)
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := ioutil.ReadAll(resp.Body)
-
+	channelCmds, err := fetchFossaCommands(channel.Channel.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	var msg fossaResp
-	if err = json.Unmarshal(data, &msg); err != nil {
-		return nil, err
-	}
+	cmds := make([]Command, 0, len(channelCmds.Commands))
 
-	cmds := make([]Command, 0, len(msg.Commands))
-
-	for _, x := range msg.Commands {
+	for _, x := range channelCmds.Commands {
 		cmds = append(cmds, Command{
 			Prefix:      "!" + x.Name,
 			Description: x.Response,
@@ -55,4 +65,26 @@ func FetchFossa(uid UserId, login UserLogin) ([]Command, error) {
 	}
 
 	return cmds, nil
+}
+
+func fetchFossaChannel(login UserLogin) (*fossaChannelResp, error) {
+	msg := &fossaChannelResp{}
+	url := `https://fossabot.com/api/v2/cached/channels/by-slug/` + login
+
+	if err := FetchJson(url, msg); err != nil {
+		return nil, err
+	}
+
+	return msg, nil
+}
+
+func fetchFossaCommands(fossaChannelId UserId) (*fossaCommandsResp, error) {
+	msg := &fossaCommandsResp{}
+	url := `https://fossabot.com/api/v2/cached/channels/` + fossaChannelId + `/commands`
+
+	if err := FetchJson(url, msg); err != nil {
+		return nil, err
+	}
+
+	return msg, nil
 }

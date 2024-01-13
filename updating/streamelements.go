@@ -7,30 +7,32 @@ import (
 
 type seChannelResp struct {
 	Profile struct {
-		Headerimage string `json:"headerImage"`
+		Title       string `json:"title"`
+		HeaderImage string `json:"headerImage"`
 	} `json:"profile"`
-	Provider        string `json:"provider"`
-	Broadcastertype string `json:"broadcasterType"`
-	Suspended       bool   `json:"suspended"`
 	ID              string `json:"_id"`
-	Ispartner       bool   `json:"isPartner"`
-	Providerid      string `json:"providerId"`
-	Displayname     string `json:"displayName"`
-	Username        string `json:"username"`
+	Provider        string `json:"provider"`
+	Suspended       bool   `json:"suspended"`
 	Avatar          string `json:"avatar"`
+	Username        string `json:"username"`
 	Alias           string `json:"alias"`
+	DisplayName     string `json:"displayName"`
+	ProviderID      string `json:"providerId"`
+	IsPartner       bool   `json:"isPartner"`
+	BroadcasterType string `json:"broadcasterType"`
 	Inactive        bool   `json:"inactive"`
 }
 
 type seDefaultCommandsResp []struct {
-	Commandid      string `json:"commandId"`
+	ID             string `json:"_id"`
 	Command        string `json:"command"`
+	CommandID      string `json:"commandId"`
 	AccessLevel    int    `json:"accessLevel"`
 	Enabled        bool   `json:"enabled"`
 	EnabledOnline  bool   `json:"enabledOnline"`
 	EnabledOffline bool   `json:"enabledOffline"`
 	ModuleEnabled  bool   `json:"moduleEnabled,omitempty"`
-	Moduleid       string `json:"moduleId"`
+	ModuleID       string `json:"moduleId"`
 	Cost           int    `json:"cost"`
 	Cooldown       struct {
 		User   int `json:"user"`
@@ -47,6 +49,8 @@ type seChannelCommandsResp []struct {
 		User   int `json:"user"`
 		Global int `json:"global"`
 	} `json:"cooldown"`
+	TitleKeywords  []interface{} `json:"titleKeywords"`
+	ID             string        `json:"_id"`
 	Aliases        []interface{} `json:"aliases"`
 	Keywords       []interface{} `json:"keywords"`
 	Enabled        bool          `json:"enabled"`
@@ -56,13 +60,12 @@ type seChannelCommandsResp []struct {
 	Cost           int           `json:"cost"`
 	Type           string        `json:"type"`
 	AccessLevel    int           `json:"accessLevel"`
-	ID             string        `json:"_id"`
-	UpdatedAt      time.Time     `json:"updatedAt"`
-	CreatedAt      time.Time     `json:"createdAt"`
-	Command        string        `json:"command"`
-	Reply          string        `json:"reply"`
-	Channel        string        `json:"channel"`
 	Regex          string        `json:"regex,omitempty"`
+	Reply          string        `json:"reply"`
+	Command        string        `json:"command"`
+	Channel        string        `json:"channel"`
+	CreatedAt      time.Time     `json:"createdAt"`
+	UpdatedAt      time.Time     `json:"updatedAt"`
 }
 
 // FetchStreamElements loads the public commands from the streamelements api by user id.

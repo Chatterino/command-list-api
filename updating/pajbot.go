@@ -3,7 +3,7 @@ package updating
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	. "self/prelude"
@@ -54,48 +54,50 @@ func fetchPajbotCommands(domain string) ([]Command, error) {
 		return nil, err
 	}
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	var msg struct {
 		Commands []struct {
-			ID                    int         `json:"id"`
-			Level                 int         `json:"level"`
-			MainAlias             string      `json:"main_alias"`
-			Aliases               []string    `json:"aliases"`
-			Description           interface{} `json:"description"`
-			LongDescription       string      `json:"long_description"`
-			CdAll                 int         `json:"cd_all"`
-			CdUser                int         `json:"cd_user"`
-			Enabled               bool        `json:"enabled"`
-			Cost                  int         `json:"cost"`
-			TokensCost            int         `json:"tokens_cost"`
-			CanExecuteWithWhisper bool        `json:"can_execute_with_whisper"`
-			SubOnly               bool        `json:"sub_only"`
-			ModOnly               bool        `json:"mod_only"`
-			ResolveString         string      `json:"resolve_string"`
-			Examples              []struct {
-				ID          interface{} `json:"id"`
-				CommandID   int         `json:"command_id"`
-				Title       string      `json:"title"`
-				Description string      `json:"description"`
-				Messages    []struct {
-					Source struct {
-						Type string      `json:"type"`
-						From string      `json:"from"`
-						To   interface{} `json:"to"`
-					} `json:"source"`
-					Message string `json:"message"`
-				} `json:"messages"`
-			} `json:"examples"`
-			Data struct {
-				NumUses      int       `json:"num_uses"`
+			Aliases               []string `json:"aliases"`
+			CanExecuteWithWhisper bool     `json:"can_execute_with_whisper"`
+			CdUser                int      `json:"cd_user"`
+			CdAll                 int      `json:"cd_all"`
+			Cost                  int      `json:"cost"`
+			Data                  struct {
 				AddedBy      string    `json:"added_by"`
 				EditedBy     string    `json:"edited_by"`
 				LastDateUsed time.Time `json:"last_date_used"`
+				NumUses      int       `json:"num_uses"`
 			} `json:"data"`
+			Description interface{} `json:"description"`
+			Enabled     bool        `json:"enabled"`
+			Examples    []struct {
+				CommandID   int         `json:"command_id"`
+				Description string      `json:"description"`
+				ID          interface{} `json:"id"`
+				Messages    []struct {
+					Message string `json:"message"`
+					Source  struct {
+						From string      `json:"from"`
+						To   interface{} `json:"to"`
+						Type string      `json:"type"`
+					} `json:"source"`
+				} `json:"messages"`
+				Title string `json:"title"`
+			} `json:"examples"`
+			ID                int         `json:"id"`
+			JsonDescription   interface{} `json:"json_description"`
+			Level             int         `json:"level"`
+			LongDescription   string      `json:"long_description"`
+			MainAlias         string      `json:"main_alias"`
+			ModOnly           bool        `json:"mod_only"`
+			ParsedDescription string      `json:"parsed_description"`
+			ResolveString     string      `json:"resolve_string"`
+			SubOnly           bool        `json:"sub_only"`
+			TokensCost        int         `json:"tokens_cost"`
 		} `json:"commands"`
 	}
 
@@ -109,7 +111,7 @@ func fetchPajbotCommands(domain string) ([]Command, error) {
 
 		cmds = append(cmds, Command{
 			Prefix:      x.MainAlias,
-			Description: "",
+			Description: x.ParsedDescription,
 			Source:      "Pajbot",
 		})
 	}
@@ -132,7 +134,7 @@ func updatePajbotBotList() error {
 		return err
 	}
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("Failed to read pajbot.com bot list: ", err)
 		return err
